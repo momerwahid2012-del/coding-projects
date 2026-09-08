@@ -1,15 +1,27 @@
-# Rehan School Coding Projects - Minimal Portfolio
+# Rehan School Coding Projects
 
-Minimal, single-file Node.js portfolio for Rehan School coding tasks.
+A simple public portfolio with a private, SQLite-backed admin dashboard.
 
-## Files to commit
-- `package.json`
-- `app.js`
-- `.gitignore`
-- `README.md`
+## Setup
 
-## Setup locally
-1. Clone the repo and open the folder.
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
+   ```
+2. Create the one admin account (run this once):
+   ```bash
+   node app.js create-admin your-email@example.com your-password
+   ```
+3. Start the website:
+   ```bash
+   npm start
+   ```
+4. Open `http://localhost:3000` for the public portfolio or `http://localhost:3000/admin` to sign in.
+
+The database is stored in `data.sqlite`. Add `SESSION_SECRET` in the environment when deploying so sessions use a private value:
+
+```bash
+SESSION_SECRET="a-long-private-value" npm start
+```
+
+Only the admin session can create, edit, or delete projects. Day number and title are the only required fields; all other fields may be left blank.

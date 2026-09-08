@@ -1,7 +1,7 @@
 {
-  "name": "rehan-portfolio-minimal",
+  "name": "rehan-portfolio-modern",
   "version": "1.0.0",
-  "description": "Minimal Rehan School portfolio (single-file server)",
+  "description": "Modern Rehan School coding projects portfolio",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
