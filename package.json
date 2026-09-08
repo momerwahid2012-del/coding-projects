@@ -1,0 +1,15 @@
+{
+  "name": "rehan-portfolio-minimal",
+  "version": "1.0.0",
+  "description": "Minimal Rehan School portfolio (2-file setup)",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "sqlite3": "^5.1.6"
+  }
+}
