@@ -1,70 +1,267 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>coding-projects — Main Page</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0;padding:1.5rem;color:#111;background:#f7f7fb}
-    header{background:#24292f;color:#fff;padding:1rem;border-radius:6px}
-    main{max-width:900px;margin:1.25rem auto;background:#fff;padding:1.25rem;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
-    a.button{display:inline-block;padding:.4rem .75rem;background:#0366d6;color:#fff;border-radius:6px;text-decoration:none}
-    pre{background:#0b1220;color:#cfe9ff;padding:1rem;border-radius:6px;overflow:auto}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Home · Rehan School Coding Projects</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%2523101620%22%2F%3E%3Ctext%20x%3D%2216%22%20y%3D%2222%22%20font-family%3D%22monospace%22%20font-size%3D%2218%22%20fill%3D%22%2523E2A63A%22%20text-anchor%3D%22middle%22%3E%2F%26gt%3B%3C%2Ftext%3E%3C%2Fsvg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F6; --paper:#FFFFFF; --ink:#1B2333; --muted:#5C6579; --border:#DBE0EA;
+  --accent:#D98E2B; --accent-ink:#5B3B0C; --teal:#2F6F5E; --danger:#B0432B;
+  --radius:4px; --max-width:1120px;
+  --shadow:0 1px 2px rgba(27,35,51,0.06);
+}
+html[data-theme="dark"]{
+  --bg:#101620; --paper:#171E2A; --ink:#ECEAE2; --muted:#95A0B4; --border:#28303F;
+  --accent:#E2A63A; --accent-ink:#2A1B03; --teal:#4FA98A; --danger:#E2665A;
+  --shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);
+  transition:background .15s ease,color .15s ease;}
+.mono{font-family:'IBM Plex Mono',Consolas,monospace;}
+a{color:var(--teal)}
+.container{max-width:var(--max-width);margin:0 auto;padding:0 20px}
+.header{background:var(--paper);border-bottom:1px solid var(--border);padding:14px 0;position:sticky;top:0;z-index:20}
+.header .container{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:600;text-decoration:none;color:var(--ink);font-size:17px;display:flex;align-items:baseline;gap:8px}
+.brand .mono{color:var(--accent);font-size:14px}
+.header nav{display:flex;align-items:center;gap:18px}
+.header nav a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500}
+.header nav a:hover{color:var(--ink)}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:var(--radius);width:32px;height:32px;
+  cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:15px}
+.theme-toggle:hover{border-color:var(--accent)}
+
+.hero{padding:44px 0 18px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.hero .stamp{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);
+  border:1px solid var(--border);border-radius:999px;padding:3px 10px;margin-bottom:14px}
+.hero h1{font-size:28px;line-height:1.25;margin:0 0 8px;font-weight:600;max-width:640px}
+.hero p{color:var(--muted);margin:0 0 20px;max-width:60ch}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters input[type=text]{flex:1;min-width:180px}
+.filters input,.filters select{padding:9px 12px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--paper);color:var(--ink);font-size:14px;font-family:inherit}
+.filters .prompt{font-family:'IBM Plex Mono',monospace;color:var(--accent);align-self:center}
+.btn{background:var(--ink);color:var(--paper);border:none;padding:9px 16px;border-radius:var(--radius);
+  cursor:pointer;font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{opacity:.88}
+.btn-accent{background:var(--accent);color:var(--accent-ink)}
+.btn-outline{background:transparent;color:var(--ink);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--ink)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);padding:6px 12px;font-size:13px}
+.btn-sm{padding:6px 12px;font-size:13px}
+
+.result-meta{display:flex;justify-content:space-between;align-items:center;margin:22px 0 14px;color:var(--muted);font-size:13px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:8px}
+.card{background:var(--paper);border:1px solid var(--border);border-left:4px solid var(--cat-color,var(--accent));
+  border-radius:0 var(--radius) var(--radius) 0;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.day-tag{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cat-color,var(--accent));font-weight:600}
+.card h3{margin:0;font-size:17px;font-weight:600;line-height:1.35}
+.card h3 a{color:var(--ink);text-decoration:none}
+.card h3 a:hover{color:var(--teal)}
+.screenshot{width:100%;height:150px;object-fit:cover;display:block;background:var(--bg)}
+.card p.desc{color:var(--muted);font-size:14px;line-height:1.5;margin:0;flex:1}
+.chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;background:color-mix(in srgb, var(--cat-color, var(--accent)) 16%, transparent);
+  color:var(--cat-color,var(--accent));font-weight:600;width:fit-content}
+.card-links{display:flex;gap:14px;font-size:13px;margin-top:2px}
+.card-links a{text-decoration:none;font-weight:500}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .mono{display:block;font-size:13px;margin-bottom:8px}
+
+.pagination{display:flex;justify-content:center;gap:8px;align-items:center;margin:28px 0 44px;font-size:14px}
+.pagination a, .pagination span{padding:7px 12px;border-radius:var(--radius);border:1px solid var(--border);
+  text-decoration:none;color:var(--ink)}
+.pagination .current{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pagination .disabled{opacity:.4;pointer-events:none}
+
+.footer{padding:28px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+.footer .mono{color:var(--muted)}
+
+.form-page{max-width:760px;margin:0 auto}
+.panel{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow)}
+.panel h2{margin-top:0;font-size:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13.5px;font-weight:500;margin-bottom:5px;color:var(--muted)}
+.input, textarea, select.input{width:100%;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);font-family:inherit;font-size:14px}
+.input:focus, textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.error-box{color:var(--danger);padding:10px 12px;border-radius:var(--radius);background:color-mix(in srgb, var(--danger) 12%, transparent);margin-bottom:16px;font-size:14px}
+.field-row{display:flex;gap:14px}
+.field-row .field{flex:1}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin-top:8px}
+
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.stat{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;min-width:130px}
+.stat .num{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--accent)}
+.stat .label{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+.table-wrap{background:var(--paper);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th{text-align:left;font-size:12.5px;color:var(--muted);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border)}
+.table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover{background:var(--bg)}
+.actions{display:flex;gap:10px;align-items:center}
+.actions a{font-size:13px;text-decoration:none;color:var(--teal)}
+.actions form{display:inline}
+
+.toast{position:fixed;top:16px;right:16px;z-index:50;background:var(--paper);border:1px solid var(--border);
+  border-left:4px solid var(--teal);box-shadow:var(--shadow);border-radius:var(--radius);padding:11px 14px;
+  display:flex;align-items:center;gap:12px;font-size:14px;max-width:320px}
+.toast-error{border-left-color:var(--danger)}
+.toast-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);line-height:1}
+
+.login-wrap{max-width:380px;margin:70px auto}
+
+@media(max-width:700px){
+  .header .container{flex-wrap:wrap}
+  .header nav{gap:12px;font-size:13px}
+  .filters input[type=text]{width:100%}
+  .field-row{flex-direction:column;gap:0}
+  .table th:nth-child(3),.table td:nth-child(3){display:none}
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1 style="margin:0;font-size:1.25rem">coding-projects</h1>
-    <div style="margin-top:.25rem;color:#cfe9ff;font-size:.9rem">Simple main page (fallback if app.js is missing)</div>
-  </header>
 
-  <main>
-    <section id="content">
-      <h2>Main app</h2>
-      <div id="app-area">
-        <p>Attempting to load app.js...</p>
+<header class="header">
+  <div class="container">
+    <a class="brand" href="/">Rehan School <span class="mono">/&gt; coding-log</span></a>
+    <nav>
+      <a href="/admin">Admin</a>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </nav>
+  </div>
+</header>
+<main class="container"><section class="hero">
+  <span class="stamp mono">entry log · 6 projects · through day 006</span>
+  <h1>A running log of my coding tasks</h1>
+  <p>Every project I build gets logged here — day number, what it does, and links to try it or read the code.</p>
+  <form class="filters" action="/" method="get">
+    <span class="prompt mono">$</span>
+    <input type="text" name="q" placeholder="search by day, title, description…" value="">
+    <select name="category">
+      <option value="">All categories</option>
+      <option value="CLI" >CLI</option><option value="Web" >Web</option><option value="Game" >Game</option>
+    </select>
+    <select name="sort">
+      <option value="newest" selected>Newest first</option>
+      <option value="oldest" >Oldest first</option>
+      <option value="title" >Title A–Z</option>
+    </select>
+    <button class="btn btn-accent" type="submit">Filter</button>
+  </form>
+</section>
+<div class="result-meta">
+  <span>6 results</span>
+</div>
+<section class="grid"><article class="card" style="--cat-color:#2F6F5E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.001</span>
+      <h3><a href="/projects/1">CLI To-Do List</a></h3>
+      <span class="chip" style="--cat-color:#2F6F5E">CLI</span>
+      <p class="desc">A simple command-line to-do list manager with add, remove, and list commands built in Node.js.</p>
+      <div class="card-links">
+        
+        <a href="https://github.com/example/day1" target="_blank" rel="noopener">Source</a>
       </div>
-      <p>If <code>app.js</code> is present in the repository root, this page will load and run it. If not, a fallback UI is shown below.</p>
-      <p>
-        <a class="button" href="README.md">Open README.md</a>
-        <a class="button" href="https://github.com/momerwahid2012-del/coding-projects" style="background:#28a745;margin-left:.5rem">View on GitHub</a>
-      </p>
-    </section>
-
-    <section style="margin-top:1rem">
-      <h3>Fallback main page</h3>
-      <div id="fallback">
-        <p>Welcome — the project's frontend script (<code>app.js</code>) was not found. This fallback shows the main content so you can preview the page without the missing script.</p>
-        <ul>
-          <li>To enable the full app, add an <code>app.js</code> file to the repository root.</li>
-          <li>If you want help creating a starter <code>app.js</code>, tell me what the app should do and I will add one.</li>
-        </ul>
+    </div>
+  </article>
+<article class="card" style="--cat-color:#2F6F5E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.002</span>
+      <h3><a href="/projects/2">Weather Dashboard</a></h3>
+      <span class="chip" style="--cat-color:#2F6F5E">Web</span>
+      <p class="desc">Pulls live weather data from a public API and displays a 5-day forecast with icons.</p>
+      <div class="card-links">
+        <a href="https://example.com/demo2" target="_blank" rel="noopener">Live demo</a>
+        <a href="https://github.com/example/day2" target="_blank" rel="noopener">Source</a>
       </div>
-    </section>
-  </main>
-
-  <script>
-    // Try to fetch app.js from the same folder; if present, insert it as a module script.
-    async function tryLoadApp() {
-      const appArea = document.getElementById('app-area');
-      try {
-        const resp = await fetch('app.js');
-        if (resp.ok) {
-          const code = await resp.text();
-          const script = document.createElement('script');
-          // Use module so modern code with import/export can work
-          script.type = 'module';
-          script.textContent = code;
-          document.body.appendChild(script);
-          appArea.innerHTML = '<p><em>app.js loaded successfully.</em></p>';
-        } else {
-          appArea.innerHTML = '<p><strong>app.js not found.</strong> Showing fallback content below.</p>';
-        }
-      } catch (err) {
-        appArea.innerHTML = '<p>Error loading app.js: ' + String(err) + '</p>';
-      }
-    }
-    tryLoadApp();
-  </script>
+    </div>
+  </article>
+<article class="card" style="--cat-color:#3E8E7E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.003</span>
+      <h3><a href="/projects/3">Snake Game</a></h3>
+      <span class="chip" style="--cat-color:#3E8E7E">Game</span>
+      <p class="desc">Classic Snake built with HTML canvas and vanilla JS, keyboard controls, score tracking.</p>
+      <div class="card-links">
+        <a href="https://example.com/demo3" target="_blank" rel="noopener">Live demo</a>
+        <a href="https://github.com/example/day3" target="_blank" rel="noopener">Source</a>
+      </div>
+    </div>
+  </article>
+<article class="card" style="--cat-color:#2F6F5E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.004</span>
+      <h3><a href="/projects/4">Markdown Notes App</a></h3>
+      <span class="chip" style="--cat-color:#2F6F5E">Web</span>
+      <p class="desc">A note-taking app that renders Markdown live as you type, with local storage persistence.</p>
+      <div class="card-links">
+        <a href="https://example.com/demo4" target="_blank" rel="noopener">Live demo</a>
+        <a href="https://github.com/example/day4" target="_blank" rel="noopener">Source</a>
+      </div>
+    </div>
+  </article>
+<article class="card" style="--cat-color:#2F6F5E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.005</span>
+      <h3><a href="/projects/5">Password Generator</a></h3>
+      <span class="chip" style="--cat-color:#2F6F5E">CLI</span>
+      <p class="desc">Generates secure random passwords with adjustable length and character sets.</p>
+      <div class="card-links">
+        <a href="https://example.com/demo5" target="_blank" rel="noopener">Live demo</a>
+        <a href="https://github.com/example/day5" target="_blank" rel="noopener">Source</a>
+      </div>
+    </div>
+  </article>
+<article class="card" style="--cat-color:#3E8E7E">
+    
+    <div class="card-body">
+      <span class="day-tag">day.006</span>
+      <h3><a href="/projects/6">Tic-Tac-Toe AI</a></h3>
+      <span class="chip" style="--cat-color:#3E8E7E">Game</span>
+      <p class="desc">Tic-Tac-Toe with an unbeatable minimax-based computer opponent.</p>
+      <div class="card-links">
+        <a href="https://example.com/demo6" target="_blank" rel="noopener">Live demo</a>
+        <a href="https://github.com/example/day6" target="_blank" rel="noopener">Source</a>
+      </div>
+    </div>
+  </article></section>
+</main>
+<footer class="footer container">
+  <span class="mono">// built for Rehan School coding tasks</span>
+</footer>
+<script>
+(function(){
+  var root = document.documentElement;
+  var saved = localStorage.getItem('theme');
+  var initial = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (initial === 'dark') root.setAttribute('data-theme','dark');
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', function(){
+    var isDark = root.getAttribute('data-theme') === 'dark';
+    if (isDark) { root.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+    else { root.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+  });
+  var toast = document.querySelector('.toast');
+  if (toast) setTimeout(function(){ toast.remove(); }, 5000);
+})();
+</script>
 </body>
 </html>
