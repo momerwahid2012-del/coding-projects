@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>coding-projects — Main Page</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:0;padding:1.5rem;color:#111;background:#f7f7fb}
+    header{background:#24292f;color:#fff;padding:1rem;border-radius:6px}
+    main{max-width:900px;margin:1.25rem auto;background:#fff;padding:1.25rem;border-radius:8px;box-shadow:0 1px 2px rgba(16,24,40,.05)}
+    a.button{display:inline-block;padding:.4rem .75rem;background:#0366d6;color:#fff;border-radius:6px;text-decoration:none}
+    pre{background:#0b1220;color:#cfe9ff;padding:1rem;border-radius:6px;overflow:auto}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 style="margin:0;font-size:1.25rem">coding-projects</h1>
+    <div style="margin-top:.25rem;color:#cfe9ff;font-size:.9rem">Simple main page (fallback if app.js is missing)</div>
+  </header>
+
+  <main>
+    <section id="content">
+      <h2>Main app</h2>
+      <div id="app-area">
+        <p>Attempting to load app.js...</p>
+      </div>
+      <p>If <code>app.js</code> is present in the repository root, this page will load and run it. If not, a fallback UI is shown below.</p>
+      <p>
+        <a class="button" href="README.md">Open README.md</a>
+        <a class="button" href="https://github.com/momerwahid2012-del/coding-projects" style="background:#28a745;margin-left:.5rem">View on GitHub</a>
+      </p>
+    </section>
+
+    <section style="margin-top:1rem">
+      <h3>Fallback main page</h3>
+      <div id="fallback">
+        <p>Welcome — the project's frontend script (<code>app.js</code>) was not found. This fallback shows the main content so you can preview the page without the missing script.</p>
+        <ul>
+          <li>To enable the full app, add an <code>app.js</code> file to the repository root.</li>
+          <li>If you want help creating a starter <code>app.js</code>, tell me what the app should do and I will add one.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Try to fetch app.js from the same folder; if present, insert it as a module script.
+    async function tryLoadApp() {
+      const appArea = document.getElementById('app-area');
+      try {
+        const resp = await fetch('app.js');
+        if (resp.ok) {
+          const code = await resp.text();
+          const script = document.createElement('script');
+          // Use module so modern code with import/export can work
+          script.type = 'module';
+          script.textContent = code;
+          document.body.appendChild(script);
+          appArea.innerHTML = '<p><em>app.js loaded successfully.</em></p>';
+        } else {
+          appArea.innerHTML = '<p><strong>app.js not found.</strong> Showing fallback content below.</p>';
+        }
+      } catch (err) {
+        appArea.innerHTML = '<p>Error loading app.js: ' + String(err) + '</p>';
+      }
+    }
+    tryLoadApp();
+  </script>
+</body>
+</html>
