@@ -23,7 +23,6 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'rehan-portfolio-secret';
@@ -98,7 +97,10 @@ app.use((req, res, next) => {
 });
 
 // --- Templates (inline) ---
-function layout(title, bodyHtml) {
+function layout(title, bodyHtml, req) {
+  const adminLinks = req && req.session && req.session.admin
+    ? `<a href="/admin/dashboard">Admin</a> <a href="/admin/logout">Logout</a>`
+    : `<a href="/admin">Admin Login</a>`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -134,10 +136,7 @@ function layout(title, bodyHtml) {
 <body>
 <header class="header container">
   <a class="brand" href="/">Rehan School Coding Projects</a>
-  <nav>
-    <a href="/">Home</a>
-    ${res.locals.admin ? `<a href="/admin">Admin</a><a href="/admin/logout">Logout</a>` : `<a href="/admin">Admin Login</a>`}
-  </nav>
+  <nav>${adminLinks}</nav>
 </header>
 <main class="container">${bodyHtml}</main>
 <footer class="footer container"><small>Built for Rehan School coding tasks</small></footer>
@@ -185,7 +184,7 @@ app.get('/', (req, res) => {
     </section>
     <section class="grid">${cards}</section>`;
 
-    res.send(layout('Home', body));
+    res.send(layout('Home', body, req));
   });
 });
 
@@ -203,7 +202,7 @@ app.get('/projects/:id', (req, res) => {
       <div class="form"><p>${escapeHtml(p.description || '')}</p>
       <p>${p.live_demo_url ? `<a class="btn" href="${escapeHtml(p.live_demo_url)}" target="_blank">View Live Demo</a>` : ''} ${p.source_code_url ? `<a class="btn" href="${escapeHtml(p.source_code_url)}" target="_blank">View Source Code</a>` : ''}</p></div>
     </article>`;
-    res.send(layout(p.title, body));
+    res.send(layout(p.title, body, req));
   });
 });
 
@@ -222,7 +221,7 @@ app.get('/admin', (req, res) => {
     </form>
     <p class="small">Create admin with: <code>node app.js create-admin email password</code></p>
   </section>`;
-  res.send(layout('Admin Login', body));
+  res.send(layout('Admin Login', body, req));
 });
 
 app.post('/admin/login', (req, res) => {
@@ -269,21 +268,21 @@ app.get('/admin/dashboard', requireAuth, (req, res) => {
       <p><a class="btn" href="/admin/new">Add New Project</a></p>
       <table class="table"><thead><tr><th>Day</th><th>Title</th><th>Category</th><th>Actions</th></tr></thead><tbody>${rowsHtml}</tbody></table>
     </section>`;
-    res.send(layout('Admin Dashboard', body));
+    res.send(layout('Admin Dashboard', body, req));
   });
 });
 
 // New project form
 app.get('/admin/new', requireAuth, (req, res) => {
   const body = renderProjectForm();
-  res.send(layout('Add Project', body));
+  res.send(layout('Add Project', body, req));
 });
 
 // Create project
 app.post('/admin/new', requireAuth, (req, res) => {
   const { day_number, title, description, screenshot_url, live_demo_url, source_code_url, category } = req.body;
   if (!day_number || !title) {
-    return res.send(layout('Add Project', renderProjectForm(req.body, 'Day Number and Title are required')));
+    return res.send(layout('Add Project', renderProjectForm(req.body, 'Day Number and Title are required'), req));
   }
   db.run(`INSERT INTO projects (day_number,title,description,screenshot_url,live_demo_url,source_code_url,category) VALUES (?,?,?,?,?,?,?)`,
     [day_number, title, description || null, screenshot_url || null, live_demo_url || null, source_code_url || null, category || null],
@@ -300,7 +299,7 @@ app.get('/admin/edit/:id', requireAuth, (req, res) => {
     if (err) return res.status(500).send('DB error');
     if (!p) return res.status(404).send('Not found');
     const body = renderProjectForm(p, null, `/admin/edit/${id}`, 'POST', true);
-    res.send(layout('Edit Project', body));
+    res.send(layout('Edit Project', body, req));
   });
 });
 
@@ -309,9 +308,8 @@ app.post('/admin/edit/:id', requireAuth, (req, res) => {
   const id = req.params.id;
   const { day_number, title, description, screenshot_url, live_demo_url, source_code_url, category, remove_screenshot } = req.body;
   if (!day_number || !title) {
-    return res.send(layout('Edit Project', renderProjectForm(Object.assign({}, req.body, { id }), 'Day Number and Title are required', `/admin/edit/${id}`, 'POST', true)));
+    return res.send(layout('Edit Project', renderProjectForm(Object.assign({}, req.body, { id }), 'Day Number and Title are required', `/admin/edit/${id}`, 'POST', true), req));
   }
-  // If remove_screenshot checked, set screenshot_url to null
   const finalScreenshot = remove_screenshot ? null : (screenshot_url || null);
   db.run(`UPDATE projects SET day_number=?, title=?, description=?, screenshot_url=?, live_demo_url=?, source_code_url=?, category=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`,
     [day_number, title, description || null, finalScreenshot, live_demo_url || null, source_code_url || null, category || null, id],
