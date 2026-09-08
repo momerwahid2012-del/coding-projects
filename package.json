@@ -1,7 +1,7 @@
 {
   "name": "rehan-portfolio-minimal",
   "version": "1.0.0",
-  "description": "Minimal Rehan School portfolio (2-file setup)",
+  "description": "Minimal Rehan School portfolio (single-file server)",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
