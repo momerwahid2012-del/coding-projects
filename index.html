@@ -1,10 +1,565 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rehan School Coding Projects</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#17202a;--muted:#68737d;--line:#dfe5e8;--accent:#ee684a;--paper:#f7f8f5;--card:#fff}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--paper);font-family:'DM Sans',sans-serif}header,main,footer{max-width:1100px;margin:auto;padding-left:24px;padding-right:24px}header{display:flex;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:24px;border-bottom:1px solid var(--line)}.brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--ink)}.mark{display:grid;place-items:center;width:42px;height:42px;background:var(--ink);color:#fff;font:700 20px 'Space Grotesk';border-radius:10px}.brand strong{display:block;font-size:16px}.brand small{color:var(--muted)}.brand strong,h1,h2{font-family:'Space Grotesk',sans-serif}nav a,.text-link{color:var(--ink);font-weight:600;text-decoration:none}nav a:hover,.text-link:hover{color:var(--accent)}main{padding-top:72px;padding-bottom:76px}.intro{display:flex;justify-content:space-between;gap:40px;align-items:end;margin-bottom:42px}h1{font-size:clamp(40px,7vw,76px);line-height:.98;max-width:650px;margin:0 0 20px;letter-spacing:-2px}.intro p{max-width:440px;color:var(--muted);font-size:18px;line-height:1.6;margin:0}.search{display:flex;gap:10px;margin-bottom:32px}input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:13px 15px;color:var(--ink);font:inherit}.search input{max-width:480px}button{border:0;border-radius:8px;background:var(--accent);color:#fff;padding:0 20px;font:600 14px 'DM Sans';cursor:pointer}button:hover{filter:brightness(.94)}.section-head{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:18px;margin-bottom:18px}h2{font-size:18px;margin:0}#resultCount{color:var(--muted);font-size:14px}#projectsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:275px;transition:transform .2s,box-shadow .2s}.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(23,32,42,.08)}.card-image{width:100%;height:150px;object-fit:cover}.card-body{padding:20px;display:flex;flex:1;flex-direction:column}.day{color:var(--accent);font:700 13px 'Space Grotesk';letter-spacing:.5px;text-transform:uppercase}.card h3{font:600 21px 'Space Grotesk';margin:10px 0 8px}.card p{color:var(--muted);line-height:1.5;margin:0;font-size:14px}.card-foot{margin-top:auto;padding-top:18px;display:flex;gap:16px;font-size:13px}.empty{grid-column:1/-1;color:var(--muted);padding:48px 0;text-align:center}footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding-top:22px;padding-bottom:22px}@media(max-width:760px){header{padding-top:16px;padding-bottom:16px}.brand small{display:none}main{padding-top:48px}.intro{display:block}h1{margin-bottom:16px}#projectsGrid{grid-template-columns:1fr}.search input{max-width:none}.search{flex-direction:column}button{min-height:46px}}
-</style></head>
-<body><header><a class="brand" href="/"><span class="mark"><img src="/assets/rehan-school-logo.png" alt="Rehan School logo" style="width:100%;height:100%;object-fit:contain" onerror="this.remove();this.nextElementSibling.style.display='block'"><span style="display:none">R</span></span><span><strong>Rehan School</strong><small>Coding projects</small></span></a><nav><a href="/admin">Admin login</a></nav></header><main><section class="intro"><div><h1>Learning in public,<br>one day at a time.</h1><p>A living archive of my Rehan School coding tasks, experiments, and finished projects.</p></div></section><form class="search" id="searchForm"><input id="searchInput" aria-label="Search projects" placeholder="Search by day, title, category, or description"><button type="submit">Search</button></form><section><div class="section-head"><h2>Project log</h2><span id="resultCount">Loading...</span></div><div id="projectsGrid"></div></section></main><footer>Built with care for Rehan School coding tasks.</footer>
-<script>const grid=document.querySelector('#projectsGrid'),input=document.querySelector('#searchInput'),count=document.querySelector('#resultCount');const esc=value=>String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));async function loadProjects(query=''){const response=await fetch('/api/projects?q='+encodeURIComponent(query));const projects=await response.json();count.textContent=`${projects.length} ${projects.length===1?'project':'projects'}`;grid.innerHTML=projects.length?projects.map(project=>`<article class="card">${project.screenshot_url?`<img class="card-image" src="${esc(project.screenshot_url)}" alt="Screenshot of ${esc(project.title)}">`:''}<div class="card-body"><span class="day">Day ${esc(project.day_number)}${project.category?` · ${esc(project.category)}`:''}</span><h3>${esc(project.title)}</h3><p>${esc(project.description)||'A Rehan School coding project.'}</p><div class="card-foot"><a class="text-link" href="/project.html?id=${project.id}">View details</a>${project.live_demo_url?`<a class="text-link" href="${esc(project.live_demo_url)}" target="_blank" rel="noopener">Live demo</a>`:''}</div></div></article>`).join(''):'<p class="empty">No projects match that search yet.</p>'}document.querySelector('#searchForm').addEventListener('submit',event=>{event.preventDefault();loadProjects(input.value)});input.addEventListener('input',()=>loadProjects(input.value));loadProjects();</script></body></html>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Muhammad Omer | Coding Projects</title>
+  <meta name="description" content="Coding projects, experiments, and tasks built by Muhammad Omer while learning programming.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --bg-soft: #edf3f2;
+      --panel: rgba(255,255,255,0.8);
+      --card: #ffffff;
+      --card-strong: #ffffff;
+      --ink: #111827;
+      --muted: #5f6b7a;
+      --line: #dfe7ea;
+      --primary: #1b6ef3;
+      --primary-soft: rgba(27,110,243,0.12);
+      --shadow: 0 20px 45px rgba(15, 23, 42, .08);
+      --radius: 22px;
+      --max: 1160px;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0b1220;
+      --bg-soft: #111b2d;
+      --panel: rgba(15, 23, 42, 0.7);
+      --card: #101b2b;
+      --card-strong: #0d1728;
+      --ink: #e5eef9;
+      --muted: #9aaabc;
+      --line: rgba(148, 163, 184, 0.2);
+      --primary: #79a8ff;
+      --primary-soft: rgba(121,168,255,0.15);
+      --shadow: 0 20px 45px rgba(2,6,23,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, rgba(27,110,243,0.08), transparent 30%), linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      line-height: 1.6;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button, input, select { font: inherit; }
+
+    .container { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0, 0, 0, 0); border: 0;
+    }
+
+    .site-header {
+      position: sticky; top: 0; z-index: 20; backdrop-filter: blur(18px);
+      background: rgba(245,247,248,0.72); border-bottom: 1px solid var(--line);
+    }
+    html[data-theme="dark"] .site-header { background: rgba(11,18,32,0.72); }
+
+    .nav { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 78px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+      background: var(--ink); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+    }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-copy strong { font-size: 1rem; }
+    .brand-copy small { color: var(--muted); font-size: 0.72rem; font-weight: 500; }
+
+    .main-nav { display: flex; align-items: center; gap: 22px; color: var(--muted); font-weight: 600; }
+    .main-nav a { transition: color 0.2s ease; }
+    .main-nav a:hover, .main-nav a:focus-visible { color: var(--ink); }
+
+    .nav-actions {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .admin-link {
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--line); background: var(--card); color: var(--ink); width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(15,23,42,0.04); transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .theme-toggle:hover, .theme-toggle:focus-visible { transform: translateY(-1px); border-color: rgba(27,110,243,0.25); }
+
+    .hero { padding: 72px 0 32px; }
+    .hero__grid { display: grid; grid-template-columns: 1.4fr 0.9fr; align-items: center; gap: 36px; }
+    .eyebrow {
+      margin: 0 0 14px; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--primary); font-weight: 700;
+    }
+    h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.04em; margin: 0; }
+    .hero__name { font-size: clamp(2.5rem, 5vw, 5.2rem); line-height: 0.96; margin-bottom: 18px; }
+    .hero__title { font-size: clamp(1.8rem, 3vw, 3rem); line-height: 1.06; margin-bottom: 16px; color: var(--ink); }
+    .hero__text { margin: 0; max-width: 620px; color: var(--muted); font-size: clamp(1.05rem, 1.5vw, 1.3rem); }
+    .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
+
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent;
+      font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .button:hover, .button:focus-visible { transform: translateY(-1px); }
+    .button--primary { background: linear-gradient(135deg, var(--primary), #2d86ff); color: white; box-shadow: 0 18px 32px rgba(27,110,243,0.25); }
+    .button--secondary { background: var(--card); border-color: var(--line); color: var(--ink); }
+    .button--ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+    .button--outline { background: var(--card-strong); border: 1px solid var(--line); color: var(--ink); }
+
+    .hero__panel {
+      background: linear-gradient(180deg, var(--card) 0%, rgba(255,255,255,0.48) 100%); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px; position: relative; overflow: hidden;
+    }
+    .hero__panel::before {
+      content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(27,110,243,0.12), transparent 33%); pointer-events: none;
+    }
+    .mini-stack { position: relative; display: grid; gap: 16px; }
+    .mini-card {
+      background: var(--card-strong); border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .mini-card strong { display: block; font-size: 2rem; line-height: 1; letter-spacing: -0.06em; }
+    .mini-card span { color: var(--muted); font-weight: 600; font-size: 0.88rem; }
+
+    .stats { padding: 14px 0 8px; }
+    .stats__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .stat {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px 18px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 12px 32px rgba(15,23,42,0.03);
+    }
+    .stat strong { font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -0.06em; line-height: 1; }
+    .stat span { color: var(--muted); font-weight: 600; }
+
+    .section { padding: 70px 0 18px; }
+    .section-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+    .section-head h3 { font-size: clamp(2rem, 3vw, 2.5rem); line-height: 1.1; }
+    .featured-grid, .project-grid { display: grid; gap: 22px; }
+    .featured-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .project-card, .feature-card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: 0 12px 30px rgba(15,23,42,0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .project-card:hover, .feature-card:hover {
+      transform: translateY(-4px); box-shadow: 0 22px 42px rgba(15,23,42,0.08); border-color: rgba(27,110,243,0.18);
+    }
+    .card-media {
+      position: relative; min-height: 220px; max-height: 260px; aspect-ratio: 16 / 10; background: linear-gradient(135deg, rgba(27,110,243,0.08), rgba(15,23,42,0.04)); border-bottom: 1px solid var(--line); overflow: hidden;
+    }
+    .card-media img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;
+    }
+    .project-card:hover .card-media img, .feature-card:hover .card-media img { transform: scale(1.02); }
+    .project-card__placeholder, .feature-card__placeholder {
+      min-height: 220px; display: grid; place-items: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; letter-spacing: -0.03em; color: var(--muted);
+      background: linear-gradient(135deg, rgba(148,163,184,0.08), rgba(15,23,42,0.02));
+    }
+    .card-body { padding: 22px 20px 18px; }
+    .card-tag {
+      display: inline-flex; align-items: center; border-radius: 999px; background: var(--primary-soft); color: var(--primary); padding: 6px 10px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 12px;
+    }
+    .card-body h4 { font-size: 1.5rem; line-height: 1.2; margin-bottom: 8px; }
+    .card-body p { margin: 0; color: var(--muted); }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tag {
+      display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; background: rgba(148,163,184,0.12); color: var(--ink); border: 1px solid var(--line);
+    }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .card-actions a { flex: 1 1 0; min-width: 0; }
+
+    .filters { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+    .search-field, .filter-field { position: relative; display: block; min-width: 220px; flex: 1; }
+    .search-field input, .filter-field select {
+      width: 100%; min-height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,0.56); color: var(--ink); box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
+    }
+    html[data-theme="dark"] .search-field input, html[data-theme="dark"] .filter-field select { background: rgba(15, 23, 42, 0.7); }
+
+    .search-field input:focus, .filter-field select:focus, .theme-toggle:focus-visible, .button:focus-visible, .card-actions a:focus-visible, .main-nav a:focus-visible { outline: 3px solid rgba(27,110,243,0.2); outline-offset: 2px; }
+
+    .empty-state {
+      display: grid; place-items: center; padding: 56px 20px; text-align: center; border: 1px dashed var(--line); border-radius: 22px; background: rgba(255,255,255,0.18); color: var(--muted);
+    }
+    .empty-state strong { display: block; color: var(--ink); font-size: 1.15rem; margin-bottom: 8px; }
+
+    .about { padding-bottom: 92px; }
+    .about__box {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 26px; padding: clamp(22px, 4vw, 32px); box-shadow: 0 18px 38px rgba(15,23,42,0.03);
+    }
+    .about__box p { margin: 0; color: var(--muted); max-width: 760px; font-size: 1.08rem; }
+
+    .site-footer { border-top: 1px solid var(--line); padding: 24px 0 50px; }
+    .site-footer .container { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .footer-brand { display: flex; flex-direction: column; gap: 2px; }
+    .footer-brand strong { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.03em; font-size: 1.2rem; }
+    .footer-brand small { color: var(--muted); }
+
+    @media (max-width: 900px) {
+      .hero__grid, .featured-grid, .project-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .nav { gap: 12px; padding: 10px 0; }
+      .main-nav { gap: 12px; font-size: 0.92rem; }
+      .brand-copy small { display: none; }
+      .hero { padding-top: 42px; }
+      .stats__grid { grid-template-columns: 1fr; }
+      .hero__actions, .card-actions { flex-direction: column; }
+      .button, .card-actions a { width: 100%; }
+      .site-footer .container { align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="Muhammad Omer home">
+        <span class="brand-mark">M</span>
+        <span class="brand-copy">
+          <strong>Muhammad Omer</strong>
+          <small>Coding Projects</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#top">Home</a>
+        <a href="#projects">Projects</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="admin-link" href="/admin">Admin</a>
+        <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light and dark mode">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero__grid">
+        <div>
+          <p class="eyebrow">Student Portfolio</p>
+          <h1 class="hero__name">Muhammad Omer</h1>
+          <h2 class="hero__title">Coding Projects</h2>
+          <p class="hero__text">Projects, experiments, and coding tasks I've built while learning.</p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="#projects">View Projects</a>
+          </div>
+        </div>
+
+        <div class="hero__panel" aria-label="Portfolio snapshot">
+          <div class="mini-stack">
+            <div class="mini-card">
+              <div>
+                <strong id="heroTotal">0</strong>
+                <span>Projects</span>
+              </div>
+              <span>📁</span>
+            </div>
+            <div class="mini-card">
+              <div>
+                <strong id="heroFeatured">0</strong>
+                <span>Featured</span>
+              </div>
+              <span>⭐</span>
+            </div>
+            <div class="mini-card">
+              <div>
+                <strong id="heroCategories">0</strong>
+                <span>Categories</span>
+              </div>
+              <span>🏷️</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Project statistics">
+      <div class="container stats__grid">
+        <div class="stat">
+          <strong id="statTotal">0</strong>
+          <span>Total Projects</span>
+        </div>
+        <div class="stat">
+          <strong id="statCategories">0</strong>
+          <span>Categories</span>
+        </div>
+        <div class="stat">
+          <strong id="statFeatured">0</strong>
+          <span>Featured</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="featured" aria-labelledby="featuredHeading">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Selected work</p>
+          <h3 id="featuredHeading">Featured Projects</h3>
+        </div>
+        <div id="featuredGrid" class="featured-grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projectsHeading">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">My work</p>
+          <h3 id="projectsHeading">My Projects</h3>
+        </div>
+
+        <div class="filters">
+          <label class="search-field">
+            <span class="sr-only">Search projects</span>
+            <input id="searchInput" type="search" placeholder="Search projects..." aria-label="Search projects">
+          </label>
+
+          <label class="filter-field">
+            <span class="sr-only">Filter by category</span>
+            <select id="categoryFilter" aria-label="Filter projects by category">
+              <option value="all">All</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="projectList" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section about" id="about" aria-labelledby="aboutHeading">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">About</p>
+          <h3 id="aboutHeading">About Me</h3>
+        </div>
+        <div class="about__box">
+          <p>I'm Muhammad Omer, a student who enjoys learning programming by building projects. This website contains the coding projects, experiments, and tasks I've created while learning.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-brand">
+        <strong>Muhammad Omer</strong>
+        <small>Coding Projects</small>
+      </div>
+      <a class="button button--secondary" href="https://github.com/" target="_blank" rel="noreferrer noopener">GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const projectList = document.getElementById('projectList');
+      const featuredGrid = document.getElementById('featuredGrid');
+      const searchInput = document.getElementById('searchInput');
+      const categoryFilter = document.getElementById('categoryFilter');
+      const themeToggle = document.getElementById('themeToggle');
+
+      const state = { projects: [], query: '', category: 'all', loading: true };
+
+      const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[char]));
+
+      const cleanText = (value) => String(value ?? '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/[*_`>#-]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      function getFeaturedProjects(projects) {
+        return [...projects]
+          .filter((project) => Number(project.day_number) >= 0)
+          .sort((a, b) => Number(b.day_number || 0) - Number(a.day_number || 0))
+          .slice(0, 4);
+      }
+
+      function setTheme(theme) {
+        const safeTheme = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', safeTheme);
+        localStorage.setItem('portfolio-theme', safeTheme);
+        themeToggle.textContent = safeTheme === 'dark' ? '☀️' : '🌙';
+      }
+
+      function renderTheme() {
+        const savedTheme = localStorage.getItem('portfolio-theme');
+        setTheme(savedTheme || 'light');
+      }
+
+      function renderStats() {
+        const total = state.projects.length;
+        const categories = [...new Set(state.projects.map((project) => project.category).filter(Boolean))];
+        const featured = getFeaturedProjects(state.projects);
+
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statCategories').textContent = categories.length;
+        document.getElementById('statFeatured').textContent = featured.length;
+
+        document.getElementById('heroTotal').textContent = total;
+        document.getElementById('heroCategories').textContent = categories.length;
+        document.getElementById('heroFeatured').textContent = featured.length;
+      }
+
+      function renderCategoryOptions() {
+        const categories = [...new Set(state.projects.map((project) => project.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        categoryFilter.innerHTML = '<option value="all">All</option>' + categories.map((category) => `<option value="${esc(category)}">${esc(category)}</option>`).join('');
+        categoryFilter.value = state.category;
+      }
+
+      function projectCard(project) {
+        const image = project.screenshot_url
+          ? `<img src="${esc(project.screenshot_url)}" alt="${esc(project.title)} project preview">`
+          : '<div class="project-card__placeholder">Project Preview</div>';
+
+        const dayLabel = project.day_number ? `Day ${esc(project.day_number)}` : 'Project';
+        const tags = project.category ? `<span class="tag">${esc(project.category)}</span>` : '';
+        const liveLink = project.live_demo_url
+          ? `<a class="button button--outline" href="${esc(project.live_demo_url)}" target="_blank" rel="noopener noreferrer">Live Project</a>`
+          : '';
+        const sourceLink = project.source_code_url
+          ? `<a class="button button--ghost" href="${esc(project.source_code_url)}" target="_blank" rel="noopener noreferrer">Source Code</a>`
+          : '';
+
+        return `
+          <article class="project-card">
+            <div class="card-media">${image}</div>
+            <div class="card-body">
+              <span class="card-tag">${dayLabel}</span>
+              <h4>${esc(project.title)}</h4>
+              <p>${esc(cleanText(project.description) || 'A coding project created while learning.')}</p>
+              <div class="card-meta">${tags}</div>
+              <div class="card-actions">
+                ${liveLink}
+                ${sourceLink}
+                <a class="button button--secondary" href="/project.html?id=${project.id}">View Details</a>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function featureCard(project) {
+        const image = project.screenshot_url
+          ? `<img src="${esc(project.screenshot_url)}" alt="${esc(project.title)} project preview">`
+          : '<div class="feature-card__placeholder">Project Preview</div>';
+
+        const dayLabel = project.day_number ? `Day ${esc(project.day_number)}` : 'Project';
+        const tags = project.category ? `<span class="tag">${esc(project.category)}</span>` : '';
+        const liveLink = project.live_demo_url
+          ? `<a class="button button--outline" href="${esc(project.live_demo_url)}" target="_blank" rel="noopener noreferrer">Live Project</a>`
+          : '';
+        const sourceLink = project.source_code_url
+          ? `<a class="button button--ghost" href="${esc(project.source_code_url)}" target="_blank" rel="noopener noreferrer">Source Code</a>`
+          : '';
+
+        return `
+          <article class="feature-card">
+            <div class="card-media">${image}</div>
+            <div class="card-body">
+              <span class="card-tag">${dayLabel}</span>
+              <h4>${esc(project.title)}</h4>
+              <p>${esc(cleanText(project.description) || 'A coding project created while learning.')}</p>
+              <div class="card-meta">${tags}</div>
+              <div class="card-actions">
+                ${liveLink}
+                ${sourceLink}
+                <a class="button button--secondary" href="/project.html?id=${project.id}">View Details</a>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderFeatured() {
+        const featured = getFeaturedProjects(state.projects);
+        if (!featured.length) {
+          featuredGrid.innerHTML = '';
+          return;
+        }
+        featuredGrid.innerHTML = featured.map(featureCard).join('');
+      }
+
+      function renderProjects() {
+        if (state.loading) {
+          projectList.innerHTML = '<div class="empty-state"><strong>Loading projects...</strong></div>';
+          return;
+        }
+
+        if (!state.projects.length) {
+          projectList.innerHTML = '<div class="empty-state"><strong>No projects have been published yet.</strong><span>Projects will appear here when they are added.</span></div>';
+          return;
+        }
+
+        const filtered = state.projects.filter((project) => {
+          const matchesCategory = state.category === 'all' || project.category === state.category;
+          const haystack = `${project.title} ${project.description} ${project.category} ${project.day_number}`.toLowerCase();
+          const matchesQuery = !state.query || haystack.includes(state.query.toLowerCase());
+          return matchesCategory && matchesQuery;
+        });
+
+        if (!filtered.length) {
+          projectList.innerHTML = '<div class="empty-state"><strong>No projects match your search.</strong><span>Try a different title or category.</span></div>';
+          return;
+        }
+
+        projectList.innerHTML = filtered.map(projectCard).join('');
+      }
+
+      async function loadProjects() {
+        try {
+          state.loading = true;
+          renderProjects();
+
+          const response = await fetch('/api/projects');
+          const projects = await response.json();
+          state.projects = Array.isArray(projects) ? projects : [];
+          state.loading = false;
+
+          renderCategoryOptions();
+          renderStats();
+          renderFeatured();
+          renderProjects();
+        } catch (error) {
+          state.loading = false;
+          state.projects = [];
+          renderCategoryOptions();
+          renderStats();
+          renderFeatured();
+          renderProjects();
+        }
+      }
+
+      searchInput.addEventListener('input', (event) => { state.query = event.target.value.trim(); renderProjects(); });
+      categoryFilter.addEventListener('change', (event) => { state.category = event.target.value; renderProjects(); });
+      themeToggle.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+
+      renderTheme();
+      loadProjects();
+    })();
+  </script>
+</body>
+</html>
