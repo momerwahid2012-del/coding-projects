@@ -31,6 +31,31 @@ db.serialize(() => {
   )`);
 });
 
+function configureAdminFromEnvironment() {
+  const email = String(process.env.ADMIN_EMAIL || '').trim();
+  const password = process.env.ADMIN_PASSWORD || '';
+  const forceReset = process.env.ADMIN_FORCE_RESET === 'true';
+  if (!email || !password) return;
+
+  bcrypt.hash(password, 10).then(hash => {
+    db.get('SELECT id FROM admins WHERE email = ?', [email], (lookupError, admin) => {
+      if (lookupError) return console.error('Could not configure admin:', lookupError.message);
+      if (admin && !forceReset) return console.log(`Admin already exists: ${email}`);
+
+      const query = admin
+        ? 'UPDATE admins SET password_hash = ? WHERE id = ?'
+        : 'INSERT INTO admins (email, password_hash) VALUES (?, ?)';
+      const values = admin ? [hash, admin.id] : [email, hash];
+      db.run(query, values, err => {
+        if (err) console.error('Could not configure admin:', err.message);
+        else console.log(`Admin ${admin ? 'password reset' : 'created'}: ${email}`);
+      });
+    });
+  }).catch(err => console.error('Could not hash admin password:', err.message));
+}
+
+configureAdminFromEnvironment();
+
 if (process.argv[2] === 'create-admin') {
   const email = process.argv[3];
   const password = process.argv[4];
@@ -101,6 +126,31 @@ function startServer() {
 
   app.get('/api/session', (req, res) => {
     res.json({ authenticated: Boolean(req.session.admin), email: req.session.admin?.email || null });
+  });
+
+  app.put('/api/account', requireAdmin, async (req, res) => {
+    const email = String(req.body?.email || '').trim();
+    const password = String(req.body?.password || '');
+    if (!email || !email.includes('@')) return res.status(400).json({ error: 'A valid email is required.' });
+    if (password && password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+
+    try {
+      const hash = password ? await bcrypt.hash(password, 10) : null;
+      const sql = hash
+        ? 'UPDATE admins SET email = ?, password_hash = ? WHERE id = ?'
+        : 'UPDATE admins SET email = ? WHERE id = ?';
+      const params = hash ? [email, hash, req.session.admin.id] : [email, req.session.admin.id];
+      db.run(sql, params, function (err) {
+        if (err) {
+          if (err.message.includes('UNIQUE')) return res.status(409).json({ error: 'That email is already in use.' });
+          return res.status(500).json({ error: 'Could not update account.' });
+        }
+        req.session.admin.email = email;
+        res.json({ email });
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Could not update account.' });
+    }
   });
 
   app.use('/api/projects', requireAdmin);
