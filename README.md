@@ -24,6 +24,8 @@ The database is stored in `data.sqlite`. Add `SESSION_SECRET` in the environment
 SESSION_SECRET="$(openssl rand -base64 48)" npm start
 ```
 
+SQLite is compiled from source during installation (configured in `.npmrc`) so its native module matches the deployment system's GLIBC version. If Render still starts with a GLIBC error after pulling this change, use **Manual Deploy → Clear build cache & deploy** once so it rebuilds the native module rather than reusing the old cached binary.
+
 ## Admin account settings
 
 Sign in at `/admin` and use the **Account settings** panel to change the admin email, password, or both. Confirm every change with the current password; a new password must be at least 12 characters and no more than 72 UTF-8 bytes. Changing account credentials signs out other active sessions. This is handled directly by the website and does not require email, SMTP, or another service. Keep your current password safe; if you lose access, the account must be recovered by someone with access to the server.
