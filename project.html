@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Project Details | Muhammad Omer</title>
   <meta name="description" content="Project details for a coding project by Muhammad Omer.">
+  <link rel="icon" type="image/png" href="/assets/rehan-school-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -51,6 +52,7 @@
     .back-link {
       display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,0.4); color: var(--ink); font-weight: 700;
     }
+    .back-link img { width: 34px; height: 37px; object-fit: contain; }
     .theme-toggle {
       width: 44px; height: 44px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 50%; cursor: pointer;
     }
@@ -110,7 +112,7 @@
 <body>
   <header class="topbar">
     <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
-      <a class="back-link" href="/">← Back to Projects</a>
+      <a class="back-link" href="/" aria-label="Rehan School, back to projects"><img src="/assets/rehan-school-logo.png" alt="Rehan School logo">Back to Projects</a>
       <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light and dark mode">🌙</button>
     </div>
   </header>
