@@ -18,13 +18,21 @@ A simple public portfolio with a private, SQLite-backed admin dashboard.
    ```
 4. Open `http://localhost:3000` for the public portfolio or `http://localhost:3000/admin` to sign in.
 
-The database is stored in `data.sqlite`. Add `SESSION_SECRET` in the environment when deploying so sessions use a private value:
+By default, the database is stored in `data.sqlite` beside the app. Set `DATA_DIR` to choose another directory:
 
 ```bash
-SESSION_SECRET="$(openssl rand -base64 48)" npm start
+DATA_DIR="/var/data" npm start
 ```
 
-SQLite is compiled from source during installation (configured in `.npmrc`) so its native module matches the deployment system's GLIBC version. If Render still starts with a GLIBC error after pulling this change, use **Manual Deploy → Clear build cache & deploy** once so it rebuilds the native module rather than reusing the old cached binary.
+In production, also set `SESSION_SECRET` to a private random value with at least 32 bytes, for example `openssl rand -base64 48`.
+
+SQLite's native module must be compiled against Render's system libraries. The `postinstall` script explicitly rebuilds `sqlite3` from source even when Render reuses its dependency cache. Confirm the Render build log shows `node-gyp rebuild` during this step. If it does not, set the Render build command to `npm install && npm_config_build_from_source=true npm rebuild sqlite3 --foreground-scripts`, then use **Manual Deploy → Clear build cache & deploy** once.
+
+### Render persistent storage
+
+Render's normal filesystem is temporary, so SQLite data can disappear when a service is redeployed or restarted. Add a **persistent disk** to the web service in the Render dashboard with mount path `/var/data`, then add `DATA_DIR=/var/data` to the service's environment variables and redeploy. This makes the database survive deployments. Persistent disks are a Render plan feature; the downloadable project backup below is an additional recovery option, not a replacement for persistent storage.
+
+If logs still show `GLIBC_2.38 not found`, verify the build log includes the source rebuild and that the service deploys the commit containing this `postinstall` script. Use **Manual Deploy → Clear build cache & deploy** after changing the build command or updating the code.
 
 ## Admin account settings
 
@@ -32,4 +40,4 @@ Sign in at `/admin` and use the **Account settings** panel to change the admin e
 
 The Rehan School logo is served from `assets/rehan-school-logo.png` and is used in the site, admin, and project-detail headers.
 
-Only the admin session can create, edit, or delete projects. Day number and title are the only required fields; all other fields may be left blank. Check “Feature this project on the homepage” to include it in the homepage’s Featured Projects section. Existing projects keep the previous behavior: the four newest projects are featured when the database is first upgraded.
+Only the admin session can create, edit, or delete projects. Day number and title are the only required fields; all other fields may be left blank. Check “Feature this project on the homepage” to include it in the homepage’s Featured Projects section. Use **Project backup → Download backup** before deployments; select, paste, or drop a downloaded JSON backup onto the restore area to replace the site's current projects with those from the backup. Existing projects keep the previous behavior: the four newest projects are featured when the database is first upgraded.

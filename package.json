@@ -4,6 +4,7 @@
   "description": "Modern Rehan School coding projects portfolio",
   "main": "app.js",
   "scripts": {
+    "postinstall": "npm_config_build_from_source=true npm rebuild sqlite3 --foreground-scripts",
     "start": "node app.js"
   },
   "dependencies": {

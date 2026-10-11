@@ -2,11 +2,14 @@ const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'data.sqlite');
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+fs.mkdirSync(DATA_DIR, { recursive: true });
+const DB_FILE = path.join(DATA_DIR, 'data.sqlite');
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-session-secret';
 const db = new sqlite3.Database(DB_FILE);
 
@@ -28,6 +31,15 @@ function dbGet(sql, params = []) {
 function dbAll(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.all(sql, params, (error, rows) => error ? reject(error) : resolve(rows));
+  });
+}
+
+function runOn(connection, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    connection.run(sql, params, function (error) {
+      if (error) return reject(error);
+      resolve({ lastID: this.lastID, changes: this.changes });
+    });
   });
 }
 
@@ -124,7 +136,7 @@ function startServer() {
     return;
   }
 
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '10mb' }));
   if (process.env.TRUST_PROXY === 'true') app.set('trust proxy', 1);
   app.use(session({
     secret: SESSION_SECRET,
@@ -198,6 +210,142 @@ function startServer() {
       }
       res.json({ authenticated: true, email: admin.email });
     });
+  });
+
+  app.get('/api/admin/backup', requireAdmin, async (req, res) => {
+    try {
+      const projects = await dbAll(
+        `SELECT id, day_number, title, COALESCE(description, '') AS description,
+          COALESCE(screenshot_url, '') AS screenshot_url,
+          COALESCE(live_demo_url, '') AS live_demo_url,
+          COALESCE(source_code_url, '') AS source_code_url,
+          COALESCE(category, '') AS category, COALESCE(featured, 0) AS featured,
+          created_at, updated_at FROM projects ORDER BY id`
+      );
+      res.set('Cache-Control', 'no-store');
+      res.set('Content-Type', 'application/json; charset=utf-8');
+      res.set('Content-Disposition', 'attachment; filename="rehan-project-backup.json"');
+      res.json({
+        format: 'rehan-school-project-backup',
+        version: 1,
+        exported_at: new Date().toISOString(),
+        projects
+      });
+    } catch (error) {
+      console.error('Could not create project backup:', error.message);
+      res.status(500).json({ error: 'Could not create project backup.' });
+    }
+  });
+
+  app.post('/api/admin/backup/import', requireAdmin, async (req, res) => {
+    const backup = req.body;
+    if (
+      !backup ||
+      backup.format !== 'rehan-school-project-backup' ||
+      backup.version !== 1 ||
+      !Array.isArray(backup.projects) ||
+      backup.projects.length > 10000
+    ) {
+      return res.status(400).json({ error: 'This is not a supported project backup file.' });
+    }
+
+    const ids = new Set();
+    const projects = [];
+    for (const project of backup.projects) {
+      if (!project || typeof project !== 'object' || Array.isArray(project)) {
+        return res.status(400).json({ error: 'Backup contains an invalid project record.' });
+      }
+      const projectId = Number(project.id);
+      const day = Number(project.day_number ?? 0);
+      if (!Number.isSafeInteger(projectId) || projectId < 1 || ids.has(projectId)) {
+        return res.status(400).json({ error: 'Backup contains a missing, invalid, or duplicate project ID.' });
+      }
+      if (!Number.isSafeInteger(day) || day < 0) {
+        return res.status(400).json({ error: `Backup contains an invalid day number for project ${projectId}.` });
+      }
+      if (typeof project.title !== 'string' || !project.title.trim() || project.title.length > 500) {
+        return res.status(400).json({ error: `Backup contains an invalid title for project ${projectId}.` });
+      }
+
+      const text = (field, maxLength) => {
+        const value = project[field] ?? '';
+        return typeof value === 'string' && value.length <= maxLength ? value : null;
+      };
+      const description = text('description', 50000);
+      const screenshotUrl = text('screenshot_url', 2048);
+      const liveDemoUrl = text('live_demo_url', 2048);
+      const sourceCodeUrl = text('source_code_url', 2048);
+      const category = text('category', 200);
+      if ([description, screenshotUrl, liveDemoUrl, sourceCodeUrl, category].includes(null)) {
+        return res.status(400).json({ error: `Backup contains invalid fields for project ${projectId}.` });
+      }
+      if (![undefined, 0, 1, false, true].includes(project.featured)) {
+        return res.status(400).json({ error: `Backup contains an invalid featured value for project ${projectId}.` });
+      }
+
+      ids.add(projectId);
+      projects.push({
+        id: projectId,
+        day_number: day,
+        title: project.title.trim(),
+        description,
+        screenshot_url: screenshotUrl,
+        live_demo_url: liveDemoUrl,
+        source_code_url: sourceCodeUrl,
+        category,
+        featured: project.featured === true || project.featured === 1 ? 1 : 0,
+        created_at: typeof project.created_at === 'string' ? project.created_at : null,
+        updated_at: typeof project.updated_at === 'string' ? project.updated_at : null
+      });
+    }
+
+    const importDb = new sqlite3.Database(DB_FILE);
+    importDb.configure('busyTimeout', 5000);
+    let transactionStarted = false;
+    try {
+      await runOn(importDb, 'BEGIN IMMEDIATE');
+      transactionStarted = true;
+      await runOn(importDb, 'DELETE FROM projects');
+      for (const project of projects) {
+        await runOn(
+          importDb,
+          `INSERT INTO projects (
+            id, day_number, title, description, screenshot_url, live_demo_url,
+            source_code_url, category, featured, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP), COALESCE(?, CURRENT_TIMESTAMP))`,
+          [
+            project.id,
+            project.day_number,
+            project.title,
+            project.description,
+            project.screenshot_url,
+            project.live_demo_url,
+            project.source_code_url,
+            project.category,
+            project.featured,
+            project.created_at,
+            project.updated_at
+          ]
+        );
+      }
+      await runOn(importDb, 'COMMIT');
+      transactionStarted = false;
+      res.json({ imported: projects.length });
+    } catch (error) {
+      if (transactionStarted) {
+        try {
+          await runOn(importDb, 'ROLLBACK');
+        } catch (rollbackError) {
+          console.error('Could not roll back backup import:', rollbackError.message);
+        }
+      }
+      console.error('Could not restore project backup:', error.message);
+      res.status(500).json({ error: 'Could not restore project backup. Check the project list and restore a known-good backup if needed.' });
+    } finally {
+      importDb.close(error => {
+        if (error) console.error('Could not close backup import database:', error.message);
+      });
+    }
   });
 
   app.put('/api/account', requireAdmin, async (req, res) => {
