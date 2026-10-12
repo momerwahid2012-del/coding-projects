@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,7 +11,8 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const DB_FILE = path.join(DATA_DIR, 'data.sqlite');
-const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-session-secret';
+const configuredSessionSecret = process.env.SESSION_SECRET;
+const SESSION_SECRET = configuredSessionSecret || crypto.randomBytes(48).toString('base64');
 const db = new sqlite3.Database(DB_FILE);
 
 function dbRun(sql, params = []) {
@@ -130,10 +132,13 @@ initializeDatabase().then(() => {
 });
 
 function startServer() {
-  if (process.env.NODE_ENV === 'production' && Buffer.byteLength(SESSION_SECRET, 'utf8') < 32) {
-    console.error('Production requires a SESSION_SECRET with at least 32 bytes.');
+  if (configuredSessionSecret && Buffer.byteLength(configuredSessionSecret, 'utf8') < 32) {
+    console.error('SESSION_SECRET must contain at least 32 bytes.');
     process.exitCode = 1;
     return;
+  }
+  if (process.env.NODE_ENV === 'production' && !configuredSessionSecret) {
+    console.warn('SESSION_SECRET is not configured. A secure temporary secret was generated; sessions will be invalidated when the service restarts. Set SESSION_SECRET in the service environment to keep the secret stable.');
   }
 
   app.use(express.json({ limit: '10mb' }));

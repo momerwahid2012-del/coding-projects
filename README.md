@@ -24,7 +24,7 @@ By default, the database is stored in `data.sqlite` beside the app. Set `DATA_DI
 DATA_DIR="/var/data" npm start
 ```
 
-In production, also set `SESSION_SECRET` to a private random value with at least 32 bytes, for example `openssl rand -base64 48`.
+In production, set `SESSION_SECRET` to a private random value with at least 32 bytes, for example `openssl rand -base64 48`. If it is missing, the app generates a secure temporary secret and can start, but admin sessions will be invalidated when the service restarts. An explicitly configured secret shorter than 32 bytes is rejected.
 
 SQLite's native module must be compiled against Render's system libraries. The `postinstall` script explicitly rebuilds `sqlite3` from source even when Render reuses its dependency cache. Confirm the Render build log shows `node-gyp rebuild` during this step. If it does not, set the Render build command to `npm install && npm_config_build_from_source=true npm rebuild sqlite3 --foreground-scripts`, then use **Manual Deploy → Clear build cache & deploy** once.
 
