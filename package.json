@@ -1,7 +1,7 @@
 {
-  "name": "rehan-portfolio-modern",
+  "name": "muhammad-omer-official-portfolio",
   "version": "1.0.0",
-  "description": "Modern Rehan School coding projects portfolio",
+  "description": "Modern Muhammad Omer Official coding projects portfolio",
   "main": "app.js",
   "scripts": {
     "postinstall": "npm_config_build_from_source=true npm rebuild sqlite3 --foreground-scripts",

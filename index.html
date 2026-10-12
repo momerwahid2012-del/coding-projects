@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Muhammad Omer | Coding Projects</title>
   <meta name="description" content="Coding projects, experiments, and tasks built by Muhammad Omer while learning programming.">
-  <link rel="icon" type="image/png" href="/assets/rehan-school-logo.png">
+  <link rel="icon" type="image/png" href="/assets/muhammad-omer-official-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -70,9 +70,9 @@
     .nav { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 78px; }
     .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: -0.02em; }
     .brand-mark {
-      width: 52px; height: 52px; flex: 0 0 52px; display: grid; place-items: center;
+      width: 60px; height: 60px; flex: 0 0 60px; display: grid; place-items: center; overflow: hidden; border-radius: 50%;
     }
-    .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .brand-copy { display: flex; flex-direction: column; line-height: 1.1; }
     .brand-copy strong { font-size: 1rem; }
     .brand-copy small { color: var(--muted); font-size: 0.72rem; font-weight: 500; }
@@ -232,8 +232,8 @@
 <body>
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="#top" aria-label="Rehan School home">
-        <span class="brand-mark"><img src="/assets/rehan-school-logo.png" alt="Rehan School logo"></span>
+      <a class="brand" href="#top" aria-label="Muhammad Omer Official home">
+        <span class="brand-mark"><img src="/assets/muhammad-omer-official-logo.png" alt="Muhammad Omer Official logo"></span>
         <span class="brand-copy">
           <strong>Muhammad Omer</strong>
           <small>Coding Projects</small>
@@ -369,6 +369,7 @@
     </div>
   </footer>
 
+  <script src="/description-format.js"></script>
   <script>
     (() => {
       const projectList = document.getElementById('projectList');
@@ -382,12 +383,6 @@
       const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       }[char]));
-
-      const cleanText = (value) => String(value ?? '')
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/[*_`>#-]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
 
       function getFeaturedProjects(projects) {
         return [...projects]
@@ -447,7 +442,7 @@
             <div class="card-body">
               <span class="card-tag">${dayLabel}</span>
               <h4>${esc(project.title)}</h4>
-              <p>${esc(cleanText(project.description) || 'A coding project created while learning.')}</p>
+              <p>${esc(DescriptionFormat.plainText(project.description) || 'A coding project created while learning.')}</p>
               <div class="card-meta">${tags}</div>
               <div class="card-actions">
                 ${liveLink}
@@ -479,7 +474,7 @@
             <div class="card-body">
               <span class="card-tag">${dayLabel}</span>
               <h4>${esc(project.title)}</h4>
-              <p>${esc(cleanText(project.description) || 'A coding project created while learning.')}</p>
+              <p>${esc(DescriptionFormat.plainText(project.description) || 'A coding project created while learning.')}</p>
               <div class="card-meta">${tags}</div>
               <div class="card-actions">
                 ${liveLink}

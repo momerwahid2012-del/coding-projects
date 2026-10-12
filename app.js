@@ -137,6 +137,9 @@ function startServer() {
     process.exitCode = 1;
     return;
   }
+  if (process.env.NODE_ENV === 'production' && !process.env.DATA_DIR) {
+    console.warn('DATA_DIR is not configured. SQLite is stored beside the application, which may be temporary on Render. Mount a persistent disk and set DATA_DIR to its mount path to keep projects across deployments.');
+  }
   if (process.env.NODE_ENV === 'production' && !configuredSessionSecret) {
     console.warn('SESSION_SECRET is not configured. A secure temporary secret was generated; sessions will be invalidated when the service restarts. Set SESSION_SECRET in the service environment to keep the secret stable.');
   }

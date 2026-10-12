@@ -1,5 +1,5 @@
-Place your Rehan School logo image in this folder with the exact filename:
+The Muhammad Omer Official logo is installed in this folder with the exact filename:
 
-rehan-school-logo.png
+`muhammad-omer-official-logo.png`
 
-The logo will automatically appear in the public portfolio and admin page. If you use another filename, update the image src in index.html and admin.html.
+It is used in the public portfolio, admin dashboard, project detail page, and browser tab icons. If you replace the logo, keep this filename so all pages continue to use it.

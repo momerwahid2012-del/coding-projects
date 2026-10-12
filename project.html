@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Project Details | Muhammad Omer</title>
   <meta name="description" content="Project details for a coding project by Muhammad Omer.">
-  <link rel="icon" type="image/png" href="/assets/rehan-school-logo.png">
+  <link rel="icon" type="image/png" href="/assets/muhammad-omer-official-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -52,7 +52,7 @@
     .back-link {
       display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,0.4); color: var(--ink); font-weight: 700;
     }
-    .back-link img { width: 34px; height: 37px; object-fit: contain; }
+    .back-link img { width: 44px; height: 44px; object-fit: cover; border-radius: 50%; }
     .theme-toggle {
       width: 44px; height: 44px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 50%; cursor: pointer;
     }
@@ -82,6 +82,12 @@
       background: rgba(255,255,255,0.18); border: 1px solid var(--line); border-radius: 18px; padding: 20px;
     }
     .project-summary p, .project-aside p { margin: 0; color: var(--muted); font-size: 1.06rem; }
+    .description-content { color: var(--muted); font-size: 1.06rem; line-height: 1.75; overflow-wrap: anywhere; }
+    .description-content > :first-child { margin-top: 0; }
+    .description-content > :last-child { margin-bottom: 0; }
+    .description-content ul, .description-content ol { padding-left: 1.5rem; }
+    .description-content blockquote { margin-left: 0; padding-left: 1rem; border-left: 3px solid var(--primary); }
+    .description-content pre { overflow-x: auto; padding: 1rem; border-radius: 10px; background: rgba(148,163,184,0.12); }
     .meta-list { display: grid; gap: 16px; margin-top: 4px; }
     .meta-item { display: flex; flex-direction: column; gap: 6px; }
     .meta-item span {
@@ -112,7 +118,7 @@
 <body>
   <header class="topbar">
     <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
-      <a class="back-link" href="/" aria-label="Rehan School, back to projects"><img src="/assets/rehan-school-logo.png" alt="Rehan School logo">Back to Projects</a>
+      <a class="back-link" href="/" aria-label="Muhammad Omer Official, back to projects"><img src="/assets/muhammad-omer-official-logo.png" alt="Muhammad Omer Official logo">Back to Projects</a>
       <button class="theme-toggle" type="button" id="themeToggle" aria-label="Toggle light and dark mode">🌙</button>
     </div>
   </header>
@@ -123,6 +129,7 @@
     </div>
   </main>
 
+  <script src="/description-format.js"></script>
   <script>
     const projectDetail = document.getElementById('projectDetail');
     const themeToggle = document.getElementById('themeToggle');
@@ -130,12 +137,6 @@
     const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[char]));
-
-    const cleanText = (value) => String(value ?? '')
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/[*_`>#-]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
 
     function setTheme(theme) {
       const safeTheme = theme === 'dark' ? 'dark' : 'light';
@@ -182,7 +183,7 @@
         const tags = project.category
           ? `<div class="tag-list"><span class="tag">${esc(project.category)}</span></div>`
           : '';
-        const description = cleanText(project.description) || 'No description was added for this project.';
+        const description = DescriptionFormat.render(project.description) || '<p>No description was added for this project.</p>';
 
         projectDetail.innerHTML = `
           <div class="project-shell">
@@ -197,7 +198,7 @@
 
             <div class="project-grid">
               <div class="project-summary">
-                <p>${esc(description)}</p>
+                <div class="description-content">${description}</div>
               </div>
 
               <aside class="project-aside">
