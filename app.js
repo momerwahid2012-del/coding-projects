@@ -142,7 +142,9 @@ function startServer() {
   }
 
   app.use(express.json({ limit: '10mb' }));
-  if (process.env.TRUST_PROXY === 'true') app.set('trust proxy', 1);
+  if (process.env.NODE_ENV === 'production' || process.env.TRUST_PROXY === 'true') {
+    app.set('trust proxy', 1);
+  }
   app.use(session({
     secret: SESSION_SECRET,
     resave: false,
