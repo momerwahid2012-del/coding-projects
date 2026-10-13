@@ -36,6 +36,52 @@ function dbAll(sql, params = []) {
   });
 }
 
+class SQLiteSessionStore extends session.Store {
+  get(sid, callback) {
+    dbGet('SELECT sess, expires_at FROM sessions WHERE sid = ?', [sid]).then(row => {
+      if (!row) return callback(null, null);
+      if (row.expires_at <= Date.now()) {
+        return dbRun('DELETE FROM sessions WHERE sid = ?', [sid])
+          .then(() => callback(null, null), callback);
+      }
+      let storedSession;
+      try {
+        storedSession = JSON.parse(row.sess);
+      } catch (error) {
+        return callback(error);
+      }
+      callback(null, storedSession);
+    }, callback);
+  }
+
+  set(sid, sessionData, callback) {
+    const cookie = sessionData.cookie || {};
+    const cookieExpiry = cookie.expires ? new Date(cookie.expires).getTime() : NaN;
+    const expiresAt = Number.isFinite(cookieExpiry)
+      ? cookieExpiry
+      : Date.now() + (Number(cookie.maxAge) || 24 * 60 * 60 * 1000);
+    dbRun(
+      `INSERT INTO sessions (sid, sess, expires_at) VALUES (?, ?, ?)
+       ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expires_at = excluded.expires_at`,
+      [sid, JSON.stringify(sessionData), expiresAt]
+    ).then(() => callback(null), callback);
+  }
+
+  touch(sid, sessionData, callback) {
+    const cookie = sessionData.cookie || {};
+    const cookieExpiry = cookie.expires ? new Date(cookie.expires).getTime() : NaN;
+    const expiresAt = Number.isFinite(cookieExpiry)
+      ? cookieExpiry
+      : Date.now() + (Number(cookie.maxAge) || 24 * 60 * 60 * 1000);
+    dbRun('UPDATE sessions SET expires_at = ? WHERE sid = ?', [expiresAt, sid])
+      .then(() => callback(null), callback);
+  }
+
+  destroy(sid, callback) {
+    dbRun('DELETE FROM sessions WHERE sid = ?', [sid]).then(() => callback(null), callback);
+  }
+}
+
 function runOn(connection, sql, params = []) {
   return new Promise((resolve, reject) => {
     connection.run(sql, params, function (error) {
@@ -65,6 +111,13 @@ async function initializeDatabase() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  await dbRun(`CREATE TABLE IF NOT EXISTS sessions (
+    sid TEXT PRIMARY KEY,
+    sess TEXT NOT NULL,
+    expires_at INTEGER NOT NULL
+  )`);
+  await dbRun('CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at)');
+  await dbRun('DELETE FROM sessions WHERE expires_at <= ?', [Date.now()]);
 
   const adminColumns = await dbAll('PRAGMA table_info(admins)');
   if (!adminColumns.some(column => column.name === 'session_version')) {
@@ -141,8 +194,14 @@ function startServer() {
     console.warn('DATA_DIR is not configured. SQLite is stored beside the application, which may be temporary on Render. Mount a persistent disk and set DATA_DIR to its mount path to keep projects across deployments.');
   }
   if (process.env.NODE_ENV === 'production' && !configuredSessionSecret) {
-    console.warn('SESSION_SECRET is not configured. A secure temporary secret was generated; sessions will be invalidated when the service restarts. Set SESSION_SECRET in the service environment to keep the secret stable.');
+    console.warn('SESSION_SECRET is not configured. A secure temporary secret was generated; persisted admin sessions will be invalidated when the service restarts. Set SESSION_SECRET in the service environment to keep the secret stable.');
   }
+
+  const sessionCleanup = setInterval(() => {
+    dbRun('DELETE FROM sessions WHERE expires_at <= ?', [Date.now()])
+      .catch(error => console.error('Could not clean expired sessions:', error.message));
+  }, 60 * 60 * 1000);
+  sessionCleanup.unref();
 
   app.use(express.json({ limit: '10mb' }));
   if (process.env.NODE_ENV === 'production' || process.env.TRUST_PROXY === 'true') {
@@ -150,8 +209,10 @@ function startServer() {
   }
   app.use(session({
     secret: SESSION_SECRET,
+    store: new SQLiteSessionStore(),
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
       httpOnly: true,
       sameSite: 'lax',

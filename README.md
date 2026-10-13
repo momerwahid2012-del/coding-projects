@@ -24,13 +24,13 @@ By default, the database is stored in `data.sqlite` beside the app. Set `DATA_DI
 DATA_DIR="/var/data" npm start
 ```
 
-In production, set `SESSION_SECRET` to a private random value with at least 32 bytes, for example `openssl rand -base64 48`. If it is missing, the app generates a secure temporary secret; an explicitly configured secret shorter than 32 bytes is rejected. The current Express session store keeps sessions in process memory, so admins must sign in again after a service restart or deploy even when the secret is stable. A stable secret prevents cookie-signature changes, but does not make in-memory sessions persistent. Production automatically trusts the single reverse proxy used by Render so HTTPS admin session cookies work without additional proxy settings.
+In production, set `SESSION_SECRET` to a private random value with at least 32 bytes, for example `openssl rand -base64 48`, and keep the same value across deployments. If it is missing, the app generates a temporary secret and persisted admin sessions will stop working after the service restarts. An explicitly configured secret shorter than 32 bytes is rejected. Admin sessions are stored in the app's SQLite database, expire after 24 hours without a request, and have their expiry extended whenever the admin uses the site. Production automatically trusts the single reverse proxy used by Render so HTTPS admin session cookies work without additional proxy settings.
 
 SQLite's native module must be compiled against Render's system libraries. The `postinstall` script explicitly rebuilds `sqlite3` from source even when Render reuses its dependency cache. Confirm the Render build log shows `node-gyp rebuild` during this step. If it does not, set the Render build command to `npm install && npm_config_build_from_source=true npm rebuild sqlite3 --foreground-scripts`, then use **Manual Deploy → Clear build cache & deploy** once.
 
 ### Render persistent storage
 
-Render's normal filesystem is temporary, so SQLite data can disappear when a service is redeployed or restarted. Add a **persistent disk** to the web service in the Render dashboard with mount path `/var/data`, then add `DATA_DIR=/var/data` to the service's environment variables and redeploy. This makes the database survive deployments. Persistent disks are a Render plan feature; the downloadable project backup below is an additional recovery option, not a replacement for persistent storage.
+Render's normal filesystem is temporary, so SQLite data can disappear when a service is redeployed or restarted. This database contains both the projects and the admin sessions. Add a **persistent disk** to the web service in the Render dashboard with mount path `/var/data`, then add `DATA_DIR=/var/data` and a stable `SESSION_SECRET` to the service's environment variables and redeploy. This makes saved projects and admin sessions survive deployments. Persistent disks are a Render plan feature; the downloadable project backup below is an additional recovery option, not a replacement for persistent storage.
 
 If logs still show `GLIBC_2.38 not found`, verify the build log includes the source rebuild and that the service deploys the commit containing this `postinstall` script. Use **Manual Deploy → Clear build cache & deploy** after changing the build command or updating the code.
 
@@ -44,6 +44,13 @@ Only the admin session can create, edit, or delete projects. Day number and titl
 
 The dashboard's **Project backup → Download backup** button downloads a versioned JSON snapshot of the saved projects already loaded into the dashboard. This avoids a second authenticated request just to download a backup. Select, paste, or drop a downloaded JSON backup onto the restore area to replace the site's current projects with those from the backup.
 
-Logging out in any tab signs out the shared browser session in every tab; it does not delete project records. If the dashboard reports **Admin login required**, sign in again. If the saved projects are missing after signing in, verify the Render service is using the persistent disk database: mount the disk at `/var/data` and set `DATA_DIR=/var/data`. Also configure a stable `SESSION_SECRET` (at least 32 bytes) so sessions survive restarts. Render's ordinary filesystem is temporary, so projects stored outside the persistent disk may be lost during a deploy or restart. A backup cannot recover records that were already removed from that temporary filesystem; use a previously downloaded backup if available.
+### Render login and missing-project troubleshooting
+
+These are two different problems:
+
+- **“Admin login required” while saving or restoring:** the browser's admin session may have expired after 24 hours without a request, the Render service may have restarted while `SESSION_SECRET` was missing or changed, or the database may be on Render's temporary filesystem. Sessions are now stored in SQLite rather than process memory, and active requests extend their 24-hour expiry. Keep `SESSION_SECRET` unchanged and store `data.sqlite` on the persistent disk to keep sessions valid through service restarts and deployments. If the message appears, sign in again; the failed save or restore is rejected, not applied.
+- **Projects missing after signing in:** logging out only ends the admin session; it does not remove projects. If projects disappear after a deployment, the service may be using a fresh SQLite database because `DATA_DIR=/var/data` and the persistent disk are not configured. Configure the disk and `DATA_DIR` before restoring your backup, then use **Project backup → Choose backup file** to import it. Data already lost from Render's temporary filesystem can only be recovered from a backup.
+
+Logging out in any tab signs out the shared browser session in every tab. Your downloaded backup remains a useful recovery copy, but regularly download a new one after important changes.
 
 Existing projects keep the previous behavior: the four newest projects are featured when the database is first upgraded.
