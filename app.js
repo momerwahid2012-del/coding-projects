@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const DB_FILE = path.join(DATA_DIR, 'data.sqlite');
+const ADMIN_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const configuredSessionSecret = process.env.SESSION_SECRET;
 const SESSION_SECRET = configuredSessionSecret || crypto.randomBytes(48).toString('base64');
 const db = new sqlite3.Database(DB_FILE);
@@ -59,7 +60,7 @@ class SQLiteSessionStore extends session.Store {
     const cookieExpiry = cookie.expires ? new Date(cookie.expires).getTime() : NaN;
     const expiresAt = Number.isFinite(cookieExpiry)
       ? cookieExpiry
-      : Date.now() + (Number(cookie.maxAge) || 24 * 60 * 60 * 1000);
+      : Date.now() + (Number(cookie.maxAge) || ADMIN_SESSION_TTL_MS);
     dbRun(
       `INSERT INTO sessions (sid, sess, expires_at) VALUES (?, ?, ?)
        ON CONFLICT(sid) DO UPDATE SET sess = excluded.sess, expires_at = excluded.expires_at`,
@@ -72,8 +73,12 @@ class SQLiteSessionStore extends session.Store {
     const cookieExpiry = cookie.expires ? new Date(cookie.expires).getTime() : NaN;
     const expiresAt = Number.isFinite(cookieExpiry)
       ? cookieExpiry
-      : Date.now() + (Number(cookie.maxAge) || 24 * 60 * 60 * 1000);
-    dbRun('UPDATE sessions SET expires_at = ? WHERE sid = ?', [expiresAt, sid])
+      : Date.now() + (Number(cookie.maxAge) || ADMIN_SESSION_TTL_MS);
+    dbRun('UPDATE sessions SET sess = ?, expires_at = ? WHERE sid = ?', [
+      JSON.stringify(sessionData),
+      expiresAt,
+      sid
+    ])
       .then(() => callback(null), callback);
   }
 
@@ -196,6 +201,7 @@ function startServer() {
   if (process.env.NODE_ENV === 'production' && !configuredSessionSecret) {
     console.warn('SESSION_SECRET is not configured. A secure temporary secret was generated; persisted admin sessions will be invalidated when the service restarts. Set SESSION_SECRET in the service environment to keep the secret stable.');
   }
+  console.log(`Using SQLite database at ${DB_FILE}`);
 
   const sessionCleanup = setInterval(() => {
     dbRun('DELETE FROM sessions WHERE expires_at <= ?', [Date.now()])
@@ -217,7 +223,7 @@ function startServer() {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: ADMIN_SESSION_TTL_MS
     }
   }));
   app.use(express.static(__dirname, { index: 'index.html' }));

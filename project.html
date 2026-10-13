@@ -43,7 +43,7 @@
     img { max-width: 100%; display: block; }
     button { font: inherit; }
 
-    .container { width: min(1000px, calc(100% - 32px)); margin: 0 auto; }
+    .container { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
     .topbar {
       display: flex; align-items: center; justify-content: space-between; min-height: 74px; border-bottom: 1px solid var(--line); backdrop-filter: blur(10px); background: rgba(245,247,248,0.72);
     }
@@ -57,29 +57,29 @@
       width: 44px; height: 44px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 50%; cursor: pointer;
     }
 
-    .page { padding: 42px 0 72px; }
+    .page { padding: 30px 0 56px; }
     .project-shell {
-      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(18px, 4vw, 32px); box-shadow: var(--shadow);
+      background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: clamp(16px, 3vw, 28px); box-shadow: var(--shadow);
     }
     .project-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
     .badge {
       display: inline-flex; align-items: center; padding: 7px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.02em;
     }
     h1 {
-      margin: 0; font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.05em; font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1.02;
+      margin: 0; font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.05em; font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1.06; overflow-wrap: anywhere;
     }
     .project-hero {
-      margin-top: 22px; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, rgba(27,110,243,0.06), rgba(15,23,42,0.03));
+      display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; margin-top: 18px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff;
     }
     .project-hero img {
-      width: 100%; max-height: 430px; object-fit: cover; object-position: center; border-radius: 18px;
+      width: 100%; height: 100%; object-fit: contain; object-position: center; background: #fff;
     }
     .project-hero__placeholder {
-      min-height: 260px; display: grid; place-items: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; color: var(--muted); background: linear-gradient(135deg, rgba(148,163,184,0.08), rgba(15,23,42,0.03));
+      width: 100%; height: 100%; display: grid; place-items: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: #5f6b7a; background: #fff;
     }
-    .project-grid { display: grid; grid-template-columns: 1.5fr 0.8fr; gap: 26px; margin-top: 28px; }
+    .project-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr); gap: 18px; margin-top: 20px; }
     .project-summary, .project-aside {
-      background: rgba(255,255,255,0.18); border: 1px solid var(--line); border-radius: 18px; padding: 20px;
+      background: var(--bg-soft); border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 2.4vw, 22px);
     }
     .project-summary p, .project-aside p { margin: 0; color: var(--muted); font-size: 1.06rem; }
     .description-content { color: var(--muted); font-size: 1.06rem; line-height: 1.75; overflow-wrap: anywhere; }
@@ -108,10 +108,17 @@
     }
     .not-found h1 { margin-bottom: 8px; }
 
-    @media (max-width: 720px) {
+    @media (max-width: 760px) {
+      .container { width: calc(100% - 32px); }
       .project-grid { grid-template-columns: 1fr; }
       .actions { flex-direction: column; }
       .button { width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .page { padding-top: 20px; }
+      .project-hero { aspect-ratio: 4 / 3; }
+      .back-link { padding: 7px 11px; font-size: 0.9rem; }
+      .back-link img { width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -171,7 +178,7 @@
 
         document.title = `${project.title} | Muhammad Omer`;
         const image = project.screenshot_url
-          ? `<img src="${esc(project.screenshot_url)}" alt="${esc(project.title)} project preview">`
+          ? `<img src="${esc(project.screenshot_url)}" alt="${esc(project.title)} project preview" decoding="async">`
           : '<div class="project-hero__placeholder">Project Preview</div>';
 
         const liveLink = project.live_demo_url
